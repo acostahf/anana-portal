@@ -1,56 +1,34 @@
-import { Link } from "@nextui-org/link";
-import { Snippet } from "@nextui-org/snippet";
-import { Code } from "@nextui-org/code";
-import { button as buttonStyles } from "@nextui-org/theme";
+"use client";
 
-import { siteConfig } from "@/config/site";
-import { title, subtitle } from "@/components/primitives";
-import { GithubIcon } from "@/components/icons";
+import RecipeForm from "@/components/RecipeForm";
+import Table from "@/components/Table";
+import { useState } from "react";
+// import { useRecipes } from "@/hooks/recipes";
 
 export default function Home() {
-  return (
-    <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
-      <div className="inline-block max-w-xl text-center justify-center">
-        <span className={title()}>Make&nbsp;</span>
-        <span className={title({ color: "violet" })}>beautiful&nbsp;</span>
-        <br />
-        <span className={title()}>
-          websites regardless of your design experience.
-        </span>
-        <div className={subtitle({ class: "mt-4" })}>
-          Beautiful, fast and modern React UI library.
-        </div>
-      </div>
+	const [slice, setSlice] = useState(0);
+	const [recipe, setRecipe] = useState("");
+	const handleSelection = (id: string) => {
+		setSlice(1);
+		setRecipe(id);
+		console.log(id);
+	};
 
-      <div className="flex gap-3">
-        <Link
-          isExternal
-          className={buttonStyles({
-            color: "primary",
-            radius: "full",
-            variant: "shadow",
-          })}
-          href={siteConfig.links.docs}
-        >
-          Documentation
-        </Link>
-        <Link
-          isExternal
-          className={buttonStyles({ variant: "bordered", radius: "full" })}
-          href={siteConfig.links.github}
-        >
-          <GithubIcon size={20} />
-          GitHub
-        </Link>
-      </div>
-
-      <div className="mt-8">
-        <Snippet hideCopyButton hideSymbol variant="bordered">
-          <span>
-            Get started by editing <Code color="primary">app/page.tsx</Code>
-          </span>
-        </Snippet>
-      </div>
-    </section>
-  );
+	switch (slice) {
+		case 1:
+			return <RecipeForm id={recipe} />;
+		default:
+			return (
+				<section className="flex items-center justify-start gap-4 py-8 md:py-10 border-small rounded-2xl h-dvh">
+					<div className="h-full w-72 border-r-small border-divider p-6">
+						<div>
+							<h2 className="text-2xl font-bold">Recipes</h2>
+						</div>
+					</div>
+					<div className="h-full w-full">
+						<Table handleSelection={handleSelection} />
+					</div>
+				</section>
+			);
+	}
 }
