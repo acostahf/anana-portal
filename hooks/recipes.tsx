@@ -83,3 +83,31 @@ export const useRecipeRating = ({ id }: { id: number }) => {
 		},
 	});
 };
+
+export const usePostRecipe = () => {
+	return useMutation({
+		mutationFn: async (recipe: Recipe) => {
+			const response = await postRecipe(recipe);
+			return response;
+		},
+		onSuccess: () => {
+			getQueryClient().invalidateQueries({
+				queryKey: ["recipes"],
+			});
+		},
+	});
+};
+
+export const useUpdateRecipe = () => {
+	return useMutation({
+		mutationFn: async (recipe: Recipe) => {
+			const response = await updateRecipe(recipe);
+			return response;
+		},
+		onSuccess: () => {
+			getQueryClient().invalidateQueries({
+				queryKey: ["recipes"],
+			});
+		},
+	});
+};

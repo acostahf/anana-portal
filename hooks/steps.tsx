@@ -2,7 +2,7 @@ import { getSteps } from "@/data-access/steps";
 
 import { useMutation, useQuery } from "@tanstack/react-query";
 
-export const useSteps = ({ id }) => {
+export const useSteps = (id: string) => {
 	return useQuery({
 		queryKey: ["steps", id],
 		queryFn: async () => {

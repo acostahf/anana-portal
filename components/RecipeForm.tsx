@@ -2,14 +2,34 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "@nextui-org/button";
 import { Select, SelectSection, SelectItem } from "@nextui-org/select";
-import { Recipe, Grandparent, Region, Image, Media } from "@/types/data";
-import { Input } from "@nextui-org/input";
-import { useRecipe, useRecipes } from "@/hooks/recipes";
+import {
+	Recipe,
+	Grandparent,
+	Region,
+	Image,
+	RecipeStep,
+	RecipeStepWithIngredients,
+} from "@/types/data";
+import { Input, Textarea } from "@nextui-org/input";
+import { Card, CardHeader, CardBody, CardFooter } from "@nextui-org/card";
+import {
+	useRecipe,
+	useRecipes,
+	useRecipeStepIngredients,
+} from "@/hooks/recipes";
+import {
+	Autocomplete,
+	AutocompleteSection,
+	AutocompleteItem,
+} from "@nextui-org/autocomplete";
 import { useGrandparents } from "@/hooks/grandparents";
 import { useRegions } from "@/hooks/regions";
 import { useMedia } from "@/hooks/media";
 import { useTags } from "@/hooks/tags";
 import { useSteps } from "@/hooks/steps";
+import { useIngredients } from "@/hooks/ingredients";
+import StepCard from "./StepCard";
+import { updateRecipe } from "@/data-access/recipes";
 
 const RecipeForm = ({ id }: { id: string }) => {
 	const { data } = useRecipe({ recipeId: id });
@@ -18,6 +38,7 @@ const RecipeForm = ({ id }: { id: string }) => {
 	const { data: media } = useMedia();
 	const { data: tagsData } = useTags();
 	const { data: recipeSteps } = useSteps(id);
+	const { data: ingredients } = useIngredients();
 	const [recipe, setRecipe] = useState<Recipe>({
 		id: 0,
 		slug: "",
@@ -35,11 +56,12 @@ const RecipeForm = ({ id }: { id: string }) => {
 		category: "",
 		published: false,
 	});
+	const [steps, setSteps] = useState<RecipeStepWithIngredients[]>([]);
 	const [tags, setTags] = useState([]);
 
 	useEffect(() => {
 		if (data) {
-			console.log(data.tags);
+			console.log(data.steps);
 			setRecipe({
 				...data.recipe,
 				region_id: data.recipe.region_id,
@@ -47,8 +69,31 @@ const RecipeForm = ({ id }: { id: string }) => {
 				image_id: data.recipe.image_id,
 			});
 			setTags(data.tags);
+			setSteps(data.steps.map((step) => ({ ...step, ingredients: [] })));
 		}
 	}, [data, tagsData]);
+
+	const handleSubmit = async (type: string) => {
+		try {
+			if (type === "publish") {
+				const resp = await updateRecipe({
+					recipe: { ...recipe, published: true },
+					steps: steps,
+					tags: tags,
+				});
+				console.log(resp);
+			} else {
+				const resp = await updateRecipe({
+					recipe: { ...recipe, published: false },
+					steps: steps,
+					tags: tags,
+				});
+				console.log(resp);
+			}
+		} catch (error) {
+			console.log(error);
+		}
+	};
 
 	return (
 		<div className="flex flex-col gap-2">
@@ -207,9 +252,22 @@ const RecipeForm = ({ id }: { id: string }) => {
 				</Select>
 			</div>
 
+			<h1>Steps</h1>
+			<div className="flex md:grid grid-cols-2 gap-2 flex-wrap">
+				{data?.steps &&
+					steps.map((item) => (
+						<StepCard
+							key={item.id.toString()}
+							recipeId={id}
+							setSteps={setSteps}
+							content={item}
+						/>
+					))}
+			</div>
+
 			<div className="flex w-full flex-wrap md:flex-nowrap gap-4">
-				<Button>Publish</Button>
-				<Button>Save</Button>
+				<Button onClick={() => handleSubmit("publish")}>Publish</Button>
+				<Button onClick={() => handleSubmit("save")}>Save</Button>
 			</div>
 		</div>
 	);

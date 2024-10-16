@@ -13,8 +13,8 @@ export const getSteps = async (id: string) => {
 
 	const stepIds = steps.map((step) => step.id);
 	const { data: stepIngredients } = await supabase
-		.from("recipe_step_ingredients")
-		.select(`*`)
+		.from("recipes_steps_ingredients")
+		.select(`*, ingredient_id(*)`)
 		.in("_parent_id", stepIds);
 
 	const stepsWithIngredients = steps.map((step) => ({

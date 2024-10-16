@@ -66,7 +66,7 @@ interface Ingredient {
 }
 
 interface RecipeStepIngredient {
-	id: number;
+	id: string;
 	_order: number;
 	_parent_id: RecipeStep;
 	ingredient_id: Ingredient;
@@ -81,6 +81,9 @@ interface RecipeStep {
 	title: string;
 	description: string;
 	image_id: Image;
+}
+interface RecipeStepWithIngredients extends RecipeStep {
+	ingredients: RecipeStepIngredient[];
 }
 
 interface Grandparent_rels {
@@ -163,4 +166,5 @@ export type {
 	RecipeStep,
 	RecipeStepIngredient,
 	Ingredient,
+	RecipeStepWithIngredients,
 };
