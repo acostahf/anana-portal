@@ -216,7 +216,6 @@ export const updateRecipe = async (updateData: {
 		.not("id", "in", stepIds)
 		.eq("_parent_id", recipe.id);
 
-	console.log("steps", steps[0].ingredients);
 	// Upsert into the recipes_ingredients table
 	const { data: updatedIngredientReferences, error: ingredientRefError } =
 		await supabase.from("recipes_steps_ingredients").upsert(
@@ -242,6 +241,25 @@ export const updateRecipe = async (updateData: {
 			"Error upserting ingredient references:",
 			ingredientRefError
 		);
+	}
+	// Delete ingredients that are not in the list
+	const ingredientIds = steps.flatMap((step) =>
+		step.ingredients.map((ingredient) => ingredient.id)
+	);
+
+	if (ingredientIds.length > 0) {
+		const { error: deleteError } = await supabase
+			.from("recipes_steps_ingredients")
+			.delete()
+			.not("id", "in", `(${ingredientIds.join(",")})`)
+			.in(
+				"_parent_id",
+				steps.map((step) => step.id)
+			);
+
+		if (deleteError) {
+			console.error("Error deleting ingredients:", deleteError);
+		}
 	}
 
 	return { recipe: updatedRecipe, tags: tags };

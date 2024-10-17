@@ -6,6 +6,7 @@ import {
 	RecipeStepIngredient,
 } from "@/types/data";
 import { Autocomplete, AutocompleteItem } from "@nextui-org/autocomplete";
+import { Button } from "@nextui-org/button";
 import { Card, CardFooter, CardHeader } from "@nextui-org/card";
 import { Input, Textarea } from "@nextui-org/input";
 import React, { useEffect, useState } from "react";
@@ -62,6 +63,19 @@ const StepCard = ({ recipeId, setSteps, content }: StepCardProps) => {
 		}
 	};
 
+	const handleDeleteIngredient = (id) => {
+		const updatedIngredients = content.ingredients.filter(
+			(ingredient) => ingredient.id !== id
+		);
+		setSteps((prevSteps) =>
+			prevSteps.map((step) =>
+				step.id === content.id
+					? { ...step, ingredients: updatedIngredients }
+					: step
+			)
+		);
+	};
+
 	return (
 		<Card className="w-full space-y-2 p-2">
 			<p>Step: {content?._order}</p>
@@ -115,7 +129,7 @@ const StepCard = ({ recipeId, setSteps, content }: StepCardProps) => {
 							className="grid grid-cols-2 w-full"
 						>
 							<p>{stepIngredient.ingredient_id.title}</p>
-							<div className="grid grid-cols-2 w-full gap-1">
+							<div className="flex flex-row gap-1 w-full ">
 								<Input
 									type="number"
 									placeholder="Amount"
@@ -156,6 +170,14 @@ const StepCard = ({ recipeId, setSteps, content }: StepCardProps) => {
 										);
 									}}
 								/>
+								<Button
+									onClick={() => handleDeleteIngredient(stepIngredient.id)}
+									fullWidth={false}
+									isIconOnly={true}
+									color="danger"
+								>
+									-
+								</Button>
 							</div>
 						</div>
 					);
