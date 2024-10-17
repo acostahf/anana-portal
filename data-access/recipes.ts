@@ -368,5 +368,5 @@ export const createStep = async (id: any) => {
 		};
 	}
 
-	return data;
+	return data[0] as RecipeStep;
 };

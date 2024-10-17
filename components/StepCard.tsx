@@ -54,7 +54,7 @@ const StepCard = ({ recipeId, setSteps, content }: StepCardProps) => {
 				unit: "", // Default unit
 				_order: 1,
 			};
-			setSteps((prevSteps) =>
+			setSteps((prevSteps: RecipeStepWithIngredients[]) =>
 				prevSteps.map((step) =>
 					step.id === content.id
 						? {

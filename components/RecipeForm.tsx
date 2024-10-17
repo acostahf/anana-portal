@@ -122,7 +122,6 @@ const RecipeForm = ({ id }: { id: string }) => {
 	const handleCreateStep = async () => {
 		try {
 			const resp = await createStep(id);
-			console.log("resp", { ...resp, ingredients: [] });
 			if (resp) {
 				setSteps([...steps, { ...resp, ingredients: [] }]);
 			}
@@ -131,6 +130,7 @@ const RecipeForm = ({ id }: { id: string }) => {
 			console.log(error);
 		}
 	};
+	console.log("steps", steps);
 
 	return (
 		<div className="flex flex-col gap-2">
