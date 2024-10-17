@@ -29,6 +29,7 @@ const StepCard = ({ recipeId, setSteps, content }: StepCardProps) => {
 
 	useEffect(() => {
 		if (stepIngreds) {
+			console.log(stepIngreds);
 			setSteps((prevSteps) =>
 				prevSteps.map((step) =>
 					step.id === content.id
@@ -46,11 +47,12 @@ const StepCard = ({ recipeId, setSteps, content }: StepCardProps) => {
 
 		if (ingredient) {
 			const newStepIngredient: RecipeStepIngredient = {
+				id: crypto.randomUUID(),
 				_parent_id: content.id as any,
 				ingredient_id: ingredient,
 				quantity: 0, // Default quantity
 				unit: "", // Default unit
-				_order: content.ingredients.length + 1,
+				_order: 1,
 			};
 			setSteps((prevSteps) =>
 				prevSteps.map((step) =>
@@ -166,68 +168,72 @@ const StepCard = ({ recipeId, setSteps, content }: StepCardProps) => {
 					);
 				})}
 			</Autocomplete>
-			<CardFooter className="flex flex-col gap-1 justify-start items-start h-40 overflow-y-scroll">
-				{content.ingredients?.map((stepIngredient) => {
-					return (
-						<div
-							key={stepIngredient.id}
-							className="grid grid-cols-2 w-full"
-						>
-							<p>{stepIngredient.ingredient_id.title}</p>
-							<div className="flex flex-row gap-1 w-full ">
-								<Input
-									type="number"
-									placeholder="Amount"
-									value={stepIngredient.quantity}
-									onChange={(e) => {
-										const updatedIngredients = content.ingredients.map(
-											(si) =>
-												si.id === stepIngredient.id
-													? { ...si, quantity: Number(e.target.value) }
-													: si
-										);
-										setSteps((prevSteps) =>
-											prevSteps.map((step) =>
-												step.id === content.id
-													? { ...step, ingredients: updatedIngredients }
-													: step
-											)
-										);
-									}}
-								/>
-								<Input
-									type="text"
-									placeholder="Unit"
-									value={stepIngredient.unit}
-									onChange={(e) => {
-										const updatedIngredients = content.ingredients.map(
-											(si) =>
-												si.id === stepIngredient.id
-													? { ...si, unit: e.target.value }
-													: si
-										);
-										setSteps((prevSteps) =>
-											prevSteps.map((step) =>
-												step.id === content.id
-													? { ...step, ingredients: updatedIngredients }
-													: step
-											)
-										);
-									}}
-								/>
-								<Button
-									onClick={() => handleDeleteIngredient(stepIngredient.id)}
-									fullWidth={false}
-									isIconOnly={true}
-									color="danger"
-								>
-									-
-								</Button>
+			{content.ingredients.length > 0 && (
+				<CardFooter className="flex flex-col gap-1 justify-start items-start h-40 overflow-y-scroll">
+					{content?.ingredients?.map((stepIngredient) => {
+						return (
+							<div
+								key={stepIngredient.id}
+								className="grid grid-cols-2 w-full"
+							>
+								<p>{stepIngredient.ingredient_id.title}</p>
+								<div className="flex flex-row gap-1 w-full ">
+									<Input
+										type="number"
+										placeholder="Amount"
+										value={stepIngredient.quantity}
+										onChange={(e) => {
+											const updatedIngredients = content.ingredients.map(
+												(si) =>
+													si.id === stepIngredient.id
+														? { ...si, quantity: Number(e.target.value) }
+														: si
+											);
+											setSteps((prevSteps) =>
+												prevSteps.map((step) =>
+													step.id === content.id
+														? { ...step, ingredients: updatedIngredients }
+														: step
+												)
+											);
+										}}
+									/>
+									<Input
+										type="text"
+										placeholder="Unit"
+										value={stepIngredient.unit}
+										onChange={(e) => {
+											const updatedIngredients = content.ingredients.map(
+												(si) =>
+													si.id === stepIngredient.id
+														? { ...si, unit: e.target.value }
+														: si
+											);
+											setSteps((prevSteps) =>
+												prevSteps.map((step) =>
+													step.id === content.id
+														? { ...step, ingredients: updatedIngredients }
+														: step
+												)
+											);
+										}}
+									/>
+									<Button
+										onClick={() =>
+											handleDeleteIngredient(stepIngredient.id)
+										}
+										fullWidth={false}
+										isIconOnly={true}
+										color="danger"
+									>
+										-
+									</Button>
+								</div>
 							</div>
-						</div>
-					);
-				})}
-			</CardFooter>
+						);
+					})}
+				</CardFooter>
+			)}
 		</Card>
 	);
 };

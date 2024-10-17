@@ -1,5 +1,6 @@
 "use client";
 import { useRecipes } from "@/hooks/recipes";
+import { Button } from "@nextui-org/button";
 import {
 	Table as NextUITable,
 	TableHeader,
@@ -31,27 +32,37 @@ interface TableProps {
 
 const Table = ({ handleSelection }: TableProps) => {
 	const { data } = useRecipes();
+
+	const handleNewRecipe = () => {
+		handleSelection("new");
+	};
 	if (data) {
 		return (
-			<NextUITable aria-label="Example table with dynamic content">
-				<TableHeader columns={columns}>
-					{(column) => (
-						<TableColumn key={column.key}>{column.label}</TableColumn>
-					)}
-				</TableHeader>
-				<TableBody items={data}>
-					{(item) => (
-						<TableRow
-							onClick={() => handleSelection(item?.id.toString())}
-							key={item.id}
-						>
-							{(columnKey) => (
-								<TableCell>{getKeyValue(item, columnKey)}</TableCell>
-							)}
-						</TableRow>
-					)}
-				</TableBody>
-			</NextUITable>
+			<div className="flex flex-col gap-2 pr-2">
+				<div className="flex justify-end">
+					<Button onClick={handleNewRecipe}>Add</Button>
+				</div>
+
+				<NextUITable aria-label="Example table with dynamic content">
+					<TableHeader columns={columns}>
+						{(column) => (
+							<TableColumn key={column.key}>{column.label}</TableColumn>
+						)}
+					</TableHeader>
+					<TableBody items={data}>
+						{(item) => (
+							<TableRow
+								onClick={() => handleSelection(item?.id.toString())}
+								key={item.id}
+							>
+								{(columnKey) => (
+									<TableCell>{getKeyValue(item, columnKey)}</TableCell>
+								)}
+							</TableRow>
+						)}
+					</TableBody>
+				</NextUITable>
+			</div>
 		);
 	}
 };

@@ -29,7 +29,11 @@ import { useTags } from "@/hooks/tags";
 import { useSteps } from "@/hooks/steps";
 import { useIngredients } from "@/hooks/ingredients";
 import StepCard from "./StepCard";
-import { updateRecipe } from "@/data-access/recipes";
+import {
+	createStep,
+	postRecipe,
+	updateRecipe,
+} from "@/data-access/recipes";
 
 const RecipeForm = ({ id }: { id: string }) => {
 	const { data } = useRecipe({ recipeId: id });
@@ -61,7 +65,6 @@ const RecipeForm = ({ id }: { id: string }) => {
 
 	useEffect(() => {
 		if (data) {
-			console.log(data.steps);
 			setRecipe({
 				...data.recipe,
 				region_id: data.recipe.region_id,
@@ -90,6 +93,40 @@ const RecipeForm = ({ id }: { id: string }) => {
 				});
 				console.log(resp);
 			}
+		} catch (error) {
+			console.log(error);
+		}
+	};
+	const handleNewSubmit = async (type: string) => {
+		try {
+			if (type === "publish") {
+				const resp = await postRecipe({
+					recipe: { ...recipe, published: true },
+					steps: steps,
+					tags: tags,
+				});
+				console.log(resp);
+			} else {
+				const resp = await postRecipe({
+					recipe: { ...recipe, published: false },
+					steps: steps,
+					tags: tags,
+				});
+				console.log(resp);
+			}
+		} catch (error) {
+			console.log(error);
+		}
+	};
+
+	const handleCreateStep = async () => {
+		try {
+			const resp = await createStep(id);
+			console.log("resp", { ...resp, ingredients: [] });
+			if (resp) {
+				setSteps([...steps, { ...resp, ingredients: [] }]);
+			}
+			console.log(steps);
 		} catch (error) {
 			console.log(error);
 		}
@@ -144,7 +181,7 @@ const RecipeForm = ({ id }: { id: string }) => {
 					setRecipe({ ...recipe, meal_size: e.target.value })
 				}
 			/> */}
-			<Input
+			{/* <Input
 				label="Updated At"
 				value={recipe.updated_at}
 				onChange={(e) =>
@@ -157,12 +194,12 @@ const RecipeForm = ({ id }: { id: string }) => {
 				onChange={(e) =>
 					setRecipe({ ...recipe, created_at: e.target.value })
 				}
-			/>
+			/> */}
 			<div className="flex w-full flex-wrap md:flex-nowrap gap-4">
 				<Select
 					onSelectionChange={(keys) => {
 						const selectedRegion = regions.find(
-							(region) => region.id === keys.currentKey
+							(region) => region.id.toString() === keys.currentKey
 						);
 						if (selectedRegion) {
 							setRecipe({ ...recipe, region_id: selectedRegion });
@@ -254,20 +291,35 @@ const RecipeForm = ({ id }: { id: string }) => {
 
 			<h1>Steps</h1>
 			<div className="flex md:grid grid-cols-2 gap-2 flex-wrap">
-				{data?.steps &&
-					steps.map((item) => (
+				{steps &&
+					steps.map((item, i) => (
 						<StepCard
-							key={item.id.toString()}
+							key={item?.id?.toString()}
 							recipeId={id}
 							setSteps={setSteps}
 							content={item}
 						/>
 					))}
 			</div>
+			<Button onClick={handleCreateStep}>Add Step</Button>
 
 			<div className="flex w-full flex-wrap md:flex-nowrap gap-4">
-				<Button onClick={() => handleSubmit("publish")}>Publish</Button>
-				<Button onClick={() => handleSubmit("save")}>Save</Button>
+				<Button
+					onClick={() =>
+						id !== ""
+							? handleSubmit("publish")
+							: handleNewSubmit("publish")
+					}
+				>
+					Publish
+				</Button>
+				<Button
+					onClick={() =>
+						id !== "" ? handleSubmit("save") : handleNewSubmit("save")
+					}
+				>
+					Save
+				</Button>
 			</div>
 		</div>
 	);

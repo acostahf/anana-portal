@@ -116,20 +116,106 @@ export const getRecipeRatings = async (id: number) => {
 	return { rating: total / data.length, total: data.length };
 };
 
-export const postRecipe = async (recipe: Recipe) => {
+export const postRecipe = async (data: {
+	recipe: Recipe;
+	steps: RecipeStepWithIngredients[];
+	tags: Tag[];
+}) => {
 	const supabase = createClient();
-	const { data, error } = await supabase
-		.from("recipes")
-		.insert([recipe])
-		.select();
+	const { recipe, steps, tags } = data;
 
-	if (error) {
+	console.log("data", data);
+	const { data: recipeData, error: recipeError } = await supabase
+		.from("recipes")
+		.insert({
+			title: recipe.title,
+			description: recipe.description,
+			cook_time: recipe.cook_time,
+			roots: recipe.roots,
+			dish: recipe.dish,
+			video: recipe.video,
+			region_id: recipe.region_id.id, // assuming you're storing just the region_id
+			grandparents_id: recipe.grandparents_id.id, // assuming you're storing just the region_id
+			slug: recipe.slug,
+			image_id: recipe.image_id.id, // storing image_id as reference
+			category: recipe.category,
+			published: recipe.published,
+		})
+		.select()
+		.single();
+
+	if (recipeError) {
 		return {
-			error: error.message,
+			error: recipeError.message,
 		};
 	}
 
-	return data;
+	const recipeId = recipeData.id;
+
+	// Insert tags
+	const { data: insertTagData, error: insertTagError } = await supabase
+		.from("recipes_rels")
+		.insert(
+			tags.map((item) => ({
+				_parent_id: recipeId,
+				tags_id: item.id,
+				order: 1,
+				path: "tags",
+			}))
+		)
+		.select();
+
+	if (insertTagError) {
+		return {
+			error: insertTagError.message,
+		};
+	}
+
+	// Insert steps
+	const { data: insertStepsData, error: insertStepsError } = await supabase
+		.from("recipes_steps")
+		.insert(
+			steps.map((step) => ({
+				_parent_id: recipeId, // Foreign key linking to the recipe
+				_order: step._order,
+				title: step.title,
+				description: step.description,
+				image_id: step.image_id ? step.image_id.id.toString() : null, // Reference to the image
+			}))
+		)
+		.select();
+
+	if (insertStepsError) {
+		return {
+			error: insertStepsError.message,
+		};
+	}
+
+	// Insert ingredients for each step
+	const { data: insertIngredientsData, error: insertIngredientsError } =
+		await supabase.from("recipes_steps_ingredients").insert(
+			insertStepsData.flatMap((step) =>
+				step.ingredients.map((ingredient) => ({
+					_parent_id: step.id, // Step ID (foreign key)
+					ingredient_id: ingredient.ingredient_id.id, // Reference to the actual ingredient
+					quantity: ingredient.quantity, // Quantity of ingredient
+					unit: ingredient.unit, // Unit of measurement
+					_order: ingredient._order, // Order in the step
+				}))
+			)
+		);
+
+	if (insertIngredientsError) {
+		return {
+			error: insertIngredientsError.message,
+		};
+	}
+
+	return {
+		recipe: recipeData,
+		tags: insertTagData,
+		steps: insertStepsData,
+	};
 };
 
 export const updateRecipe = async (updateData: {
@@ -139,7 +225,7 @@ export const updateRecipe = async (updateData: {
 }) => {
 	const supabase = createClient();
 	const { recipe, tags, steps } = updateData;
-	// console.log("updateData", updateData.steps[3].image_id.id);
+	console.log("updateData", updateData);
 	const { data: updatedRecipe, error: recipeError } = await supabase
 		.from("recipes")
 		.update({
@@ -162,7 +248,6 @@ export const updateRecipe = async (updateData: {
 	}
 
 	//update or insert tags
-	// for (const tag of tags) {
 	await supabase
 		.from("recipes_rels")
 		.delete()
@@ -186,7 +271,6 @@ export const updateRecipe = async (updateData: {
 			error: insertTagError.message,
 		};
 	}
-	// }
 
 	// Update or insert steps
 	const { data: updatedSteps, error: stepsError } = await supabase
@@ -222,11 +306,9 @@ export const updateRecipe = async (updateData: {
 		await supabase.from("recipes_steps_ingredients").upsert(
 			steps.flatMap((step) =>
 				step.ingredients.map((ingredient) => {
-					const isNew = !ingredient.id; // Check if this is a new ingredient (no ID)
-
 					return {
-						id: isNew ? crypto.randomUUID() : ingredient.id, // Generate a UUID for new rows
-						_parent_id: ingredient._parent_id, // Step ID (foreign key)
+						id: ingredient.id, // Generate a UUID for new rows
+						_parent_id: step.id, // Step ID (foreign key)
 						ingredient_id: ingredient.ingredient_id.id, // Reference to the actual ingredient
 						quantity: ingredient.quantity, // Quantity of ingredient
 						unit: ingredient.unit, // Unit of measurement
@@ -264,4 +346,27 @@ export const updateRecipe = async (updateData: {
 	}
 
 	return { recipe: updatedRecipe, tags: tags };
+};
+
+export const createStep = async (id: any) => {
+	const supabase = createClient();
+	const { data, error } = await supabase
+		.from("recipes_steps")
+		.insert([
+			{
+				title: "New Step",
+				description: "New Step Description",
+				_order: 1,
+				_parent_id: id,
+			},
+		])
+		.select();
+
+	if (error) {
+		return {
+			error: error.message,
+		};
+	}
+
+	return data;
 };
