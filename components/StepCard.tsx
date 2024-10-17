@@ -1,11 +1,13 @@
 "use client";
 import { useIngredients } from "@/hooks/ingredients";
+import { useMedia } from "@/hooks/media";
 import { useRecipeStepIngredients } from "@/hooks/recipes";
 import {
 	RecipeStepWithIngredients,
 	RecipeStepIngredient,
 } from "@/types/data";
 import { Autocomplete, AutocompleteItem } from "@nextui-org/autocomplete";
+import { Avatar } from "@nextui-org/avatar";
 import { Button } from "@nextui-org/button";
 import { Card, CardFooter, CardHeader } from "@nextui-org/card";
 import { Input, Textarea } from "@nextui-org/input";
@@ -23,6 +25,7 @@ const StepCard = ({ recipeId, setSteps, content }: StepCardProps) => {
 	});
 	const { data: ingredientsList } = useIngredients();
 	const [selectionId, setSelectionId] = useState();
+	const { data: media } = useMedia();
 
 	useEffect(() => {
 		if (stepIngreds) {
@@ -41,7 +44,6 @@ const StepCard = ({ recipeId, setSteps, content }: StepCardProps) => {
 			(ingred) => ingred.id.toString() === id
 		);
 
-		console.log(ingredient);
 		if (ingredient) {
 			const newStepIngredient: RecipeStepIngredient = {
 				_parent_id: content.id as any,
@@ -62,6 +64,22 @@ const StepCard = ({ recipeId, setSteps, content }: StepCardProps) => {
 			);
 		}
 	};
+	const onMediaSelectionChange = (id) => {
+		setSteps((prevSteps) =>
+			prevSteps.map((step) =>
+				step.id === content.id
+					? {
+							...step,
+							image_id: {
+								id: id,
+								filename: media.find((item) => item.id === Number(id))
+									?.filename,
+							},
+						}
+					: step
+			)
+		);
+	};
 
 	const handleDeleteIngredient = (id) => {
 		const updatedIngredients = content.ingredients.filter(
@@ -78,7 +96,34 @@ const StepCard = ({ recipeId, setSteps, content }: StepCardProps) => {
 
 	return (
 		<Card className="w-full space-y-2 p-2">
-			<p>Step: {content?._order}</p>
+			<div className="flex flex-row gap-2">
+				<p>Step: {content?._order}</p>
+				<div className="flex flex-col gap-2">
+					{content?.image_id?.filename && (
+						<Avatar
+							radius="sm"
+							// className="w-40 h-40 text-large"
+							src={`https://xrkclqlhaiqliboqkcjz.supabase.co/storage/v1/object/public/supabase-payload/media/${content?.image_id?.filename}`}
+						/>
+					)}
+				</div>
+				<Autocomplete
+					label="Media"
+					onSelectionChange={onMediaSelectionChange}
+					selectedKey={content?.image_id?.id.toString()}
+				>
+					{(media ?? []).map((item) => {
+						return (
+							<AutocompleteItem
+								key={item.id || `new=${item.filename}`}
+								value={item.id.toString()}
+							>
+								{item.filename}
+							</AutocompleteItem>
+						);
+					})}
+				</Autocomplete>
+			</div>
 			<Input
 				label="Title"
 				value={content?.title}

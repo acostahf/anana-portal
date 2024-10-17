@@ -139,7 +139,7 @@ export const updateRecipe = async (updateData: {
 }) => {
 	const supabase = createClient();
 	const { recipe, tags, steps } = updateData;
-	console.log("updateData", updateData);
+	// console.log("updateData", updateData.steps[3].image_id.id);
 	const { data: updatedRecipe, error: recipeError } = await supabase
 		.from("recipes")
 		.update({
@@ -198,6 +198,7 @@ export const updateRecipe = async (updateData: {
 				_order: step._order,
 				title: step.title,
 				description: step.description,
+				image_id: step.image_id ? step.image_id.id.toString() : null, // Reference to the image
 			}))
 		);
 	if (stepsError) {
