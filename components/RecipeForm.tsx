@@ -60,6 +60,15 @@ const RecipeForm = ({ id }: { id: string }) => {
 		category: "",
 		published: false,
 	});
+
+	useEffect(() => {
+		if (recipe.title) {
+			setRecipe((prevRecipe) => ({
+				...prevRecipe,
+				slug: recipe.title.replace(/\s+/g, "-").toLowerCase(),
+			}));
+		}
+	}, [recipe.title]);
 	const [steps, setSteps] = useState<RecipeStepWithIngredients[]>([]);
 	const [tags, setTags] = useState([]);
 
@@ -130,7 +139,6 @@ const RecipeForm = ({ id }: { id: string }) => {
 			console.log(error);
 		}
 	};
-	console.log("steps", steps);
 
 	return (
 		<div className="flex flex-col gap-2">
