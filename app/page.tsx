@@ -15,8 +15,6 @@ import Tus from "@uppy/tus";
 export default function Home() {
 	const supabase = createClient();
 	const router = useRouter();
-	const [session, setSession] = useState("" as any);
-	const [filename, setFilename] = useState("");
 	//get auth user session and redirect if not logged in
 	const onBeforeRequest = async (req: any) => {
 		const { data } = await supabase.auth.getSession();
@@ -44,11 +42,9 @@ export default function Home() {
 		};
 	});
 	uppy.on("upload-success", async (file) => {
-		const { data, error } = await supabase.storage
+		await supabase.storage
 			.from("supabase-payload")
 			.move(`${file?.name}`, `media/${file?.name}`);
-
-		console.log("------", data);
 	});
 	useEffect(() => {
 		const fetchUser = async () => {
@@ -57,9 +53,6 @@ export default function Home() {
 			if (!data.session?.user) {
 				//redirect to login
 				router.push("/signin");
-			}
-			if (data.session?.user) {
-				setSession(data.session.access_token);
 			}
 		};
 
