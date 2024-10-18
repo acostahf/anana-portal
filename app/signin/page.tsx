@@ -12,14 +12,14 @@ const Page = () => {
 	const [isDisabled, setIsDisabled] = useState<boolean>(false);
 	const signInWithEmail = async () => {
 		setIsLoading(true);
-
+		const redirectURL = window.location.origin + "/api/auth/callback";
 		try {
 			const { data, error } = await supabase.auth.signInWithOtp({
 				email: email,
 				options: {
 					// set this to false if you do not want the user to be automatically signed up
 					shouldCreateUser: false,
-					emailRedirectTo: window.location.origin,
+					emailRedirectTo: redirectURL,
 				},
 			});
 
