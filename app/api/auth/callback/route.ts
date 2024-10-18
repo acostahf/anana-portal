@@ -1,6 +1,5 @@
 import { NextResponse, NextRequest } from "next/server";
 import { createClient } from "@/libs/supabase/server";
-import config from "@/config";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +14,5 @@ export async function GET(req: NextRequest) {
 	}
 
 	// URL to redirect to after sign in process completes
-	return NextResponse.redirect(
-		requestUrl.origin + config.auth.callbackUrl
-	);
+	return NextResponse.redirect(requestUrl.origin + "/");
 }
