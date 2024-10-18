@@ -4,7 +4,7 @@ import MediaSection from "@/components/MediaSection";
 import RecipeForm from "@/components/RecipeForm";
 import Table from "@/components/Table";
 import { createClient } from "@/libs/supabase/client";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Uppy from "@uppy/core";
 import "@uppy/core/dist/style.min.css";
@@ -14,6 +14,7 @@ import Tus from "@uppy/tus";
 
 export default function Home() {
 	const supabase = createClient();
+	const router = useRouter();
 	const [session, setSession] = useState("" as any);
 	const [filename, setFilename] = useState("");
 	//get auth user session and redirect if not logged in
@@ -55,7 +56,7 @@ export default function Home() {
 
 			if (!data.session?.user) {
 				//redirect to login
-				redirect("/signin");
+				router.push("/signin");
 			}
 			if (data.session?.user) {
 				setSession(data.session.access_token);
