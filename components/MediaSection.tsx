@@ -2,8 +2,9 @@
 import { Button } from "@nextui-org/button";
 import React, { useState } from "react";
 import { createClient } from "@/libs/supabase/client";
+import { Dashboard } from "@uppy/react";
 
-const MediaSection = () => {
+const MediaSection = ({ uppy }: any) => {
 	const [file, setFile] = useState<File | null>(null);
 	const [uploading, setUploading] = useState(false);
 	const supabase = createClient();
@@ -50,6 +51,8 @@ const MediaSection = () => {
 			<Button onClick={handleUpload} disabled={uploading}>
 				{uploading ? "Uploading..." : "Upload"}
 			</Button>
+
+			<Dashboard id="dashboard" uppy={uppy} />
 		</div>
 	);
 };

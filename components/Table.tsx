@@ -52,6 +52,7 @@ const Table = ({ handleSelection }: TableProps) => {
 					<TableBody items={data}>
 						{(item) => (
 							<TableRow
+								className="cursor-pointer hover:bg-white/20"
 								onClick={() => handleSelection(item?.id.toString())}
 								key={item.id}
 							>
