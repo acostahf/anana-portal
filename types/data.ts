@@ -58,11 +58,11 @@ interface Media {
 }
 
 interface Ingredient {
-	id: number;
+	id?: number;
 	title: string;
 	hint: string;
-	updated_at: string;
-	created_at: string;
+	updated_at?: string;
+	created_at?: string;
 }
 
 interface RecipeStepIngredient {

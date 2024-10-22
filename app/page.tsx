@@ -10,6 +10,7 @@ import Uppy from "@uppy/core";
 import "@uppy/core/dist/style.min.css";
 import "@uppy/dashboard/dist/style.min.css";
 import Tus from "@uppy/tus";
+import AddIngredient from "@/components/AddIngredient";
 // import { useRecipes } from "@/hooks/recipes";
 
 export default function Home() {
@@ -78,6 +79,8 @@ export default function Home() {
 		case 2:
 			sliceZone = <MediaSection uppy={uppy} />;
 			break;
+		case 3:
+			sliceZone = <AddIngredient />;
 		default:
 			<Table handleSelection={handleSelection} />;
 	}
@@ -99,6 +102,14 @@ export default function Home() {
 							onClick={() => setSlice(2)}
 						>
 							Media
+						</h2>
+					</div>
+					<div>
+						<h2
+							className="text-2xl font-bold cursor-pointer"
+							onClick={() => setSlice(3)}
+						>
+							Ingredients
 						</h2>
 					</div>
 				</div>
